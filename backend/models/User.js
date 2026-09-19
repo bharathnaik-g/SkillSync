@@ -27,7 +27,11 @@ const userSchema = new mongoose.Schema(
     profileImage: String,
 
     skillsToTeach: [String],
-    skillsToLearn: [String]
+    skillsToLearn: [String],
+    creditScore: {
+  type: Number,
+  default: 0
+}
   },
   { timestamps: true }
 );
