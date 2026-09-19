@@ -1,5 +1,6 @@
 
 const Session = require("../models/Session");
+const User = require("../models/User");
 
 // 1. Create a session request
 exports.createSession = async (req, res) => {
@@ -106,6 +107,56 @@ exports.updateSessionStatus = async (req, res) => {
     console.error("Update Session Error:", error);
     res.status(500).json({
       message: "Server error while updating session"
+    });
+  }
+};
+// 4. Complete a session and award credits
+exports.completeSession = async (req, res) => {
+  try {
+    const session = await Session.findById(req.params.id);
+
+    if (!session) {
+      return res.status(404).json({
+        message: "Session not found"
+      });
+    }
+
+    if (
+      session.requester.toString() !== req.user.id &&
+      session.mentor.toString() !== req.user.id
+    ) {
+      return res.status(403).json({
+        message: "You are not part of this session"
+      });
+    }
+
+    if (session.status !== "accepted") {
+      return res.status(400).json({
+        message: "Only accepted sessions can be completed"
+      });
+    }
+
+    session.status = "completed";
+    await session.save();
+
+    // Mentor gets 10 credits
+    await User.findByIdAndUpdate(session.mentor, {
+      $inc: { creditScore: 10 }
+    });
+
+    // Learner gets 5 credits
+    await User.findByIdAndUpdate(session.requester, {
+      $inc: { creditScore: 5 }
+    });
+
+    res.status(200).json({
+      message: "Session completed and credits awarded",
+      session
+    });
+  } catch (error) {
+    console.error("Complete Session Error:", error);
+    res.status(500).json({
+      message: "Server error while completing session"
     });
   }
 };

@@ -5,7 +5,8 @@ const router = express.Router();
 const {
   createSession,
   getMySessions,
-  updateSessionStatus
+  updateSessionStatus,
+  completeSession
 } = require("../controllers/sessionController");
 
 const protect = require("../middleware/authMiddleware");
@@ -18,5 +19,5 @@ router.get("/", protect, getMySessions);
 
 // Accept or reject a session request
 router.patch("/:id/status", protect, updateSessionStatus);
-
+router.patch("/:id/complete", protect, completeSession);
 module.exports = router;

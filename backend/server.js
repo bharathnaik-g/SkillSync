@@ -3,7 +3,7 @@ const express = require("express");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
-
+const creditRoutes = require("./routes/creditRoutes");
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const matchRoutes = require("./routes/matchRoutes");
@@ -13,7 +13,7 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-
+app.use("/api/credits", creditRoutes);
 // Test route
 app.get("/", (req, res) => {
   res.send("SkillBridge Backend is running!");
