@@ -2,20 +2,19 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
-  CheckCircle2,
   Eye,
   EyeOff,
   LockKeyhole,
   Mail,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
+import AuthLayout from "../components/AuthLayout";
 
 export default function Login() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
@@ -23,7 +22,7 @@ export default function Login() {
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const submit = (e) => {
     e.preventDefault();
 
     if (!form.email || !form.password) {
@@ -32,259 +31,184 @@ export default function Login() {
     }
 
     if (!form.email.includes("@")) {
-      setError("Please enter a valid college email.");
+      setError("Enter a valid college email.");
       return;
     }
 
-    // Temporary frontend navigation
-    navigate("/dashboard");
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      navigate("/dashboard");
+    }, 900);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 lg:grid lg:grid-cols-2">
+    <AuthLayout>
 
-      {/* LEFT */}
-      <section className="relative hidden overflow-hidden bg-indigo-600 p-12 text-white lg:flex lg:min-h-screen lg:flex-col lg:justify-between xl:p-16">
-
-        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-indigo-400/30 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-indigo-900/40 blur-3xl" />
-
-        <div className="relative z-10">
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-              <Sparkles size={20} />
-            </div>
-
-            <span className="text-2xl font-bold">
-              Skill<span className="text-indigo-200">Sync</span>
-            </span>
-          </div>
+      <div>
+        <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+          <LockKeyhole size={20} />
         </div>
 
-        <div className="relative z-10 max-w-xl">
+        <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+          Welcome back
+        </h1>
 
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-indigo-100 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-emerald-300" />
-            Campus learning, reimagined
-          </div>
+        <p className="mt-3 text-slate-500">
+          Sign in to continue your learning journey.
+        </p>
+      </div>
 
-          <h1 className="text-5xl font-bold leading-tight xl:text-6xl">
-            Learn from your campus.
-            <br />
-            <span className="text-indigo-200">
-              Share what you know.
-            </span>
-          </h1>
+      {error && (
+        <div className="mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
 
-          <p className="mt-6 max-w-lg text-lg leading-8 text-indigo-100">
-            Find students who can teach what you want to learn and
-            share the skills you already know.
-          </p>
+      <form
+        onSubmit={submit}
+        className="mt-8 space-y-5"
+      >
 
-          <div className="mt-10 flex flex-wrap items-center gap-3">
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            College Email
+          </label>
 
-            <span className="rounded-xl bg-white/10 px-4 py-3 text-sm font-medium">
-              Java
-            </span>
+          <div className="relative">
 
-            <ArrowRight size={16} />
+            <Mail
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            />
 
-            <span className="rounded-xl bg-white/10 px-4 py-3 text-sm font-medium">
-              DSA
-            </span>
-
-            <ArrowRight size={16} />
-
-            <span className="rounded-xl bg-white/10 px-4 py-3 text-sm font-medium">
-              Peer Learning
-            </span>
+            <input
+              type="email"
+              value={form.email}
+              placeholder="you@college.edu"
+              onChange={(e) => {
+                setForm({
+                  ...form,
+                  email: e.target.value,
+                });
+                setError("");
+              }}
+              className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+            />
 
           </div>
         </div>
 
-        <div className="relative z-10 flex gap-6 text-sm text-indigo-200">
+        <div>
 
-          <span className="flex items-center gap-2">
-            <CheckCircle2 size={16} />
-            Learn together
-          </span>
+          <div className="mb-2 flex justify-between">
 
-          <span className="flex items-center gap-2">
-            <CheckCircle2 size={16} />
-            Share knowledge
-          </span>
-
-        </div>
-      </section>
-
-      {/* RIGHT */}
-      <section className="flex min-h-screen items-center justify-center px-6 py-12 sm:px-10">
-
-        <div className="w-full max-w-md">
-
-          <div className="mb-12 lg:hidden">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-                <Sparkles size={18} />
-              </div>
-
-              <span className="text-2xl font-bold text-slate-900">
-                Skill<span className="text-indigo-600">Sync</span>
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-              <LockKeyhole size={20} />
-            </div>
-
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Welcome back
-            </h2>
-
-            <p className="mt-3 text-slate-500">
-              Sign in to continue your learning journey.
-            </p>
-          </div>
-
-          {error && (
-            <div className="mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                College Email
-              </label>
-
-              <div className="relative">
-                <Mail
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
-                <input
-                  type="email"
-                  placeholder="you@college.edu"
-                  value={form.email}
-                  onChange={(e) => {
-                    setForm({ ...form, email: e.target.value });
-                    setError("");
-                  }}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-2 flex justify-between">
-                <label className="text-sm font-semibold text-slate-700">
-                  Password
-                </label>
-
-                <button
-                  type="button"
-                  className="text-xs font-semibold text-indigo-600"
-                >
-                  Forgot password?
-                </button>
-              </div>
-
-              <div className="relative">
-
-                <LockKeyhole
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={form.password}
-                  onChange={(e) => {
-                    setForm({ ...form, password: e.target.value });
-                    setError("");
-                  }}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-12 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
-                >
-                  {showPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-
-              <label className="flex items-center gap-2 text-sm text-slate-500">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-indigo-600"
-                />
-                Remember me
-              </label>
-
-              <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                <ShieldCheck size={14} />
-                Secure login
-              </span>
-
-            </div>
+            <label className="text-sm font-semibold text-slate-700">
+              Password
+            </label>
 
             <button
-              type="submit"
-              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-700"
+              type="button"
+              className="text-xs font-semibold text-indigo-600"
             >
-              Sign In
-              <ArrowRight
-                size={17}
-                className="transition-transform group-hover:translate-x-1"
-              />
+              Forgot password?
             </button>
 
-          </form>
-
-          <div className="my-7 flex items-center gap-4">
-            <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs text-slate-400">OR</span>
-            <div className="h-px flex-1 bg-slate-200" />
           </div>
 
-          <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-            <span className="font-bold">G</span>
-            Continue with Google
-          </button>
+          <div className="relative">
 
-          <p className="mt-8 text-center text-sm text-slate-500">
-            New to SkillSync?{" "}
-            <Link
-              to="/register"
-              className="font-semibold text-indigo-600 hover:text-indigo-700"
+            <LockKeyhole
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+
+            <input
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              placeholder="Enter your password"
+              onChange={(e) => {
+                setForm({
+                  ...form,
+                  password: e.target.value,
+                });
+                setError("");
+              }}
+              className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-12 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+            />
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowPassword(!showPassword)
+              }
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
             >
-              Create an account
-            </Link>
-          </p>
+              {showPassword ? (
+                <EyeOff size={18} />
+              ) : (
+                <Eye size={18} />
+              )}
+            </button>
 
-          <p className="mt-10 text-center text-xs text-slate-400">
-            Connect. Learn. Exchange.
-          </p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+
+          <label className="flex items-center gap-2 text-sm text-slate-500">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+            />
+            Remember me
+          </label>
+
+          <span className="flex items-center gap-1.5 text-xs text-slate-400">
+            <ShieldCheck size={14} />
+            Secure login
+          </span>
 
         </div>
-      </section>
-    </div>
+
+        <button
+          disabled={loading}
+          className="group flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-700 disabled:opacity-60"
+        >
+          {loading ? "Signing in..." : "Sign In"}
+
+          {!loading && (
+            <ArrowRight
+              size={17}
+              className="transition-transform group-hover:translate-x-1"
+            />
+          )}
+        </button>
+
+      </form>
+
+      <div className="my-7 flex items-center gap-4">
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs text-slate-400">OR</span>
+        <div className="h-px flex-1 bg-slate-200" />
+      </div>
+
+      <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+        <span className="font-bold">G</span>
+        Continue with Google
+      </button>
+
+      <p className="mt-8 text-center text-sm text-slate-500">
+        New to SkillSync?{" "}
+        <Link
+          to="/register"
+          className="font-semibold text-indigo-600"
+        >
+          Create an account
+        </Link>
+      </p>
+
+    </AuthLayout>
   );
 }

@@ -2,18 +2,19 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
-  CheckCircle2,
   Eye,
   EyeOff,
+  LockKeyhole,
   Mail,
-  Sparkles,
   User,
 } from "lucide-react";
+import AuthLayout from "../components/AuthLayout";
 
 export default function Register() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
@@ -22,7 +23,18 @@ export default function Register() {
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const passwordScore =
+    form.password.length >= 10
+      ? 3
+      : form.password.length >= 6
+      ? 2
+      : form.password.length > 0
+      ? 1
+      : 0;
+
+  const strengthText = ["", "Weak", "Good", "Strong"];
+
+  const submit = (e) => {
     e.preventDefault();
 
     if (!form.name || !form.email || !form.password) {
@@ -31,7 +43,7 @@ export default function Register() {
     }
 
     if (!form.email.includes("@")) {
-      setError("Please enter a valid college email.");
+      setError("Enter a valid college email.");
       return;
     }
 
@@ -40,231 +52,200 @@ export default function Register() {
       return;
     }
 
-    navigate("/dashboard");
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      navigate("/dashboard");
+    }, 900);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 lg:grid lg:grid-cols-2">
+    <AuthLayout type="register">
 
-      {/* LEFT */}
-      <section className="relative hidden overflow-hidden bg-indigo-600 p-12 text-white lg:flex lg:min-h-screen lg:flex-col lg:justify-between xl:p-16">
+      <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+        Create your account
+      </h1>
 
-        <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-indigo-400/30 blur-3xl" />
+      <p className="mt-3 text-slate-500">
+        Join your campus and start exchanging skills.
+      </p>
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-              <Sparkles size={20} />
-            </div>
-
-            <span className="text-2xl font-bold">
-              Skill<span className="text-indigo-200">Sync</span>
-            </span>
-          </div>
+      {error && (
+        <div className="mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
         </div>
+      )}
 
-        <div className="relative z-10 max-w-xl">
+      <form
+        onSubmit={submit}
+        className="mt-8 space-y-5"
+      >
 
-          <div className="mb-6 inline-flex rounded-full bg-white/10 px-4 py-2 text-sm text-indigo-100">
-            Your campus learning community
-          </div>
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Full Name
+          </label>
 
-          <h1 className="text-5xl font-bold leading-tight xl:text-6xl">
-            Learn something.
-            <br />
-            <span className="text-indigo-200">
-              Teach something.
-            </span>
-          </h1>
+          <div className="relative">
 
-          <p className="mt-6 text-lg leading-8 text-indigo-100">
-            SkillSync makes it easy to find peers, exchange knowledge
-            and grow together.
-          </p>
+            <User
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            />
 
-          <div className="mt-10 space-y-4">
-
-            <div className="flex items-center gap-3">
-              <CheckCircle2 size={19} />
-              <span>Find students with the skills you need</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <CheckCircle2 size={19} />
-              <span>Share the skills you already know</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <CheckCircle2 size={19} />
-              <span>Learn through peer-to-peer sessions</span>
-            </div>
+            <input
+              value={form.name}
+              placeholder="Enter your full name"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  name: e.target.value,
+                })
+              }
+              className="w-full rounded-xl border border-slate-200 py-3.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+            />
 
           </div>
         </div>
 
-        <p className="relative z-10 text-sm text-indigo-200">
-          Connect. Learn. Exchange.
-        </p>
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            College Email
+          </label>
 
-      </section>
+          <div className="relative">
 
-      {/* RIGHT */}
-      <section className="flex min-h-screen items-center justify-center px-6 py-12 sm:px-10">
+            <Mail
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            />
 
-        <div className="w-full max-w-md">
+            <input
+              type="email"
+              value={form.email}
+              placeholder="you@college.edu"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  email: e.target.value,
+                })
+              }
+              className="w-full rounded-xl border border-slate-200 py-3.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+            />
 
-          <div className="mb-12 lg:hidden">
-            <div className="flex items-center gap-2">
+          </div>
+        </div>
 
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-                <Sparkles size={18} />
-              </div>
+        <div>
 
-              <span className="text-2xl font-bold">
-                Skill<span className="text-indigo-600">Sync</span>
-              </span>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Password
+          </label>
 
-            </div>
+          <div className="relative">
+
+            <LockKeyhole
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+
+            <input
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              placeholder="Create a password"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  password: e.target.value,
+                })
+              }
+              className="w-full rounded-xl border border-slate-200 py-3.5 pl-11 pr-12 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+            />
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowPassword(!showPassword)
+              }
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+            >
+              {showPassword ? (
+                <EyeOff size={18} />
+              ) : (
+                <Eye size={18} />
+              )}
+            </button>
+
           </div>
 
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Create your account
-          </h2>
+          {form.password && (
+            <div className="mt-3">
 
-          <p className="mt-3 text-slate-500">
-            Join your campus and start exchanging skills.
-          </p>
+              <div className="flex gap-1">
 
-          {error && (
-            <div className="mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Full Name
-              </label>
-
-              <div className="relative">
-                <User
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
-                <input
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={form.name}
-                  onChange={(e) => {
-                    setForm({ ...form, name: e.target.value });
-                    setError("");
-                  }}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                College Email
-              </label>
-
-              <div className="relative">
-                <Mail
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
-                <input
-                  type="email"
-                  placeholder="you@college.edu"
-                  value={form.email}
-                  onChange={(e) => {
-                    setForm({ ...form, email: e.target.value });
-                    setError("");
-                  }}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Password
-              </label>
-
-              <div className="relative">
-
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
-                  value={form.password}
-                  onChange={(e) => {
-                    setForm({ ...form, password: e.target.value });
-                    setError("");
-                  }}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 pr-12 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
-                >
-                  {showPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
+                {[1, 2, 3].map((level) => (
+                  <div
+                    key={level}
+                    className={`h-1.5 flex-1 rounded-full ${
+                      level <= passwordScore
+                        ? "bg-indigo-500"
+                        : "bg-slate-200"
+                    }`}
+                  />
+                ))}
 
               </div>
 
               <p className="mt-2 text-xs text-slate-400">
-                Use at least 6 characters.
+                Password strength:{" "}
+                <span className="font-semibold text-slate-600">
+                  {strengthText[passwordScore]}
+                </span>
               </p>
+
             </div>
-
-            <button
-              type="submit"
-              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-700"
-            >
-              Create Account
-
-              <ArrowRight
-                size={17}
-                className="transition-transform group-hover:translate-x-1"
-              />
-            </button>
-
-          </form>
-
-          <div className="my-7 flex items-center gap-4">
-            <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs text-slate-400">OR</span>
-            <div className="h-px flex-1 bg-slate-200" />
-          </div>
-
-          <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-            <span className="font-bold">G</span>
-            Continue with Google
-          </button>
-
-          <p className="mt-8 text-center text-sm text-slate-500">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-semibold text-indigo-600"
-            >
-              Sign in
-            </Link>
-          </p>
+          )}
 
         </div>
-      </section>
-    </div>
+
+        <button
+          disabled={loading}
+          className="group flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-700 disabled:opacity-60"
+        >
+          {loading ? "Creating account..." : "Create Account"}
+
+          {!loading && (
+            <ArrowRight
+              size={17}
+              className="transition-transform group-hover:translate-x-1"
+            />
+          )}
+        </button>
+
+      </form>
+
+      <div className="my-7 flex items-center gap-4">
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs text-slate-400">OR</span>
+        <div className="h-px flex-1 bg-slate-200" />
+      </div>
+
+      <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+        <span className="font-bold">G</span>
+        Continue with Google
+      </button>
+
+      <p className="mt-8 text-center text-sm text-slate-500">
+        Already have an account?{" "}
+        <Link
+          to="/login"
+          className="font-semibold text-indigo-600"
+        >
+          Sign in
+        </Link>
+      </p>
+
+    </AuthLayout>
   );
 }

@@ -1,106 +1,77 @@
+import { useMemo, useState } from "react";
 import {
-  Search,
-  Star,
-  MapPin,
-  SlidersHorizontal,
   ArrowRight,
+  Heart,
+  Search,
+  SlidersHorizontal,
+  Star,
+  X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const students = [
-  {
-    name: "Ananya Sharma",
-    department: "Computer Science",
-    semester: "6th Semester",
-    teaches: ["React", "JavaScript", "UI Design"],
-    learns: ["Python", "AI"],
-    rating: "4.9",
-    sessions: 18,
-    color: "bg-pink-100 text-pink-600",
-  },
-  {
-    name: "Rahul Kumar",
-    department: "Information Science",
-    semester: "5th Semester",
-    teaches: ["Java", "DSA", "C++"],
-    learns: ["React", "Node.js"],
-    rating: "4.7",
-    sessions: 14,
-    color: "bg-indigo-100 text-indigo-600",
-  },
-  {
-    name: "Sneha Rao",
-    department: "Computer Science",
-    semester: "4th Semester",
-    teaches: ["Figma", "UI/UX", "HTML"],
-    learns: ["React", "Frontend"],
-    rating: "4.8",
-    sessions: 11,
-    color: "bg-emerald-100 text-emerald-600",
-  },
-  {
-    name: "Arjun Shetty",
-    department: "Information Science",
-    semester: "7th Semester",
-    teaches: ["Python", "Machine Learning", "SQL"],
-    learns: ["Cybersecurity", "Cloud"],
-    rating: "4.6",
-    sessions: 21,
-    color: "bg-orange-100 text-orange-600",
-  },
-];
+import AppShell from "../components/AppShell";
+import { students } from "../data/mockData";
 
 export default function Discover() {
+  const [query, setQuery] = useState("");
+  const [department, setDepartment] = useState("All");
+  const [rating, setRating] = useState("All");
+  const [sort, setSort] = useState("Recommended");
+  const [favorites, setFavorites] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
+
+  const filteredStudents = useMemo(() => {
+    let result = students.filter((student) => {
+
+      const search = query.toLowerCase();
+
+      const matchesSearch =
+        !search ||
+        student.name.toLowerCase().includes(search) ||
+        student.teaches.some((skill) =>
+          skill.toLowerCase().includes(search)
+        );
+
+      const matchesDepartment =
+        department === "All" ||
+        student.department === department;
+
+      const matchesRating =
+        rating === "All" ||
+        student.rating >= Number(rating);
+
+      return (
+        matchesSearch &&
+        matchesDepartment &&
+        matchesRating
+      );
+    });
+
+    if (sort === "Highest rated") {
+      result.sort((a, b) => b.rating - a.rating);
+    }
+
+    if (sort === "Most sessions") {
+      result.sort((a, b) => b.sessions - a.sessions);
+    }
+
+    return result;
+  }, [query, department, rating, sort]);
+
+  const toggleFavorite = (id) => {
+    setFavorites((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id]
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <AppShell>
 
-      <header className="border-b border-slate-200 bg-white">
-
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-
-          <Link to="/dashboard" className="text-xl font-bold">
-            Skill<span className="text-indigo-600">Sync</span>
-          </Link>
-
-          <nav className="hidden gap-7 text-sm font-medium md:flex">
-
-            <Link
-              to="/dashboard"
-              className="text-slate-500"
-            >
-              Dashboard
-            </Link>
-
-            <Link
-              to="/discover"
-              className="text-indigo-600"
-            >
-              Discover
-            </Link>
-
-            <Link
-              to="/sessions"
-              className="text-slate-500"
-            >
-              Sessions
-            </Link>
-
-          </nav>
-
-          <Link
-            to="/profile"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-600"
-          >
-            B
-          </Link>
-
-        </div>
-
-      </header>
-
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <div className="mx-auto max-w-7xl px-5 py-7 sm:px-8">
 
         <div>
+
           <p className="text-sm font-semibold text-indigo-600">
             Discover
           </p>
@@ -110,80 +81,184 @@ export default function Discover() {
           </h1>
 
           <p className="mt-2 text-slate-500">
-            Search students by the skills they can teach.
+            Discover students who can teach what you want to learn.
           </p>
+
         </div>
 
-        {/* SEARCH */}
-        <div className="mt-7 flex flex-col gap-3 md:flex-row">
+        {/* Search */}
+        <div className="mt-7 flex gap-3">
 
           <div className="relative flex-1">
 
             <Search
-              size={20}
+              size={19}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
             />
 
             <input
-              placeholder="Search by skill..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search Java, React, DSA, Figma..."
               className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
             />
 
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+              >
+                <X size={17} />
+              </button>
+            )}
+
           </div>
 
-          <button className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+          >
             <SlidersHorizontal size={17} />
-            Filters
+            <span className="hidden sm:inline">
+              Filters
+            </span>
           </button>
 
         </div>
 
-        {/* RESULTS */}
+        {/* Filters */}
+        {showFilters && (
+          <div className="mt-4 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 md:grid-cols-3">
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase text-slate-400">
+                Department
+              </label>
+
+              <select
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+              >
+                <option>All</option>
+                <option>Computer Science</option>
+                <option>Information Science</option>
+                <option>Electronics</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase text-slate-400">
+                Minimum rating
+              </label>
+
+              <select
+                value={rating}
+                onChange={(e) => setRating(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+              >
+                <option value="All">Any rating</option>
+                <option value="4">4+ stars</option>
+                <option value="4.5">4.5+ stars</option>
+                <option value="4.8">4.8+ stars</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase text-slate-400">
+                Sort by
+              </label>
+
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+              >
+                <option>Recommended</option>
+                <option>Highest rated</option>
+                <option>Most sessions</option>
+              </select>
+            </div>
+
+          </div>
+        )}
+
+        {/* Results */}
         <div className="mt-8 flex items-center justify-between">
 
           <p className="text-sm text-slate-500">
             <span className="font-semibold text-slate-900">
-              24
+              {filteredStudents.length}
             </span>{" "}
             students found
           </p>
 
-          <select className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
-            <option>Recommended</option>
-            <option>Highest rated</option>
-            <option>Most sessions</option>
-          </select>
+          <span className="text-xs text-slate-400">
+            {favorites.length} saved
+          </span>
 
         </div>
 
-        <div className="mt-5 grid gap-5 md:grid-cols-2">
+        {filteredStudents.length === 0 ? (
+          <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
 
-          {students.map((student) => (
-            <StudentCard
-              key={student.name}
-              student={student}
+            <Search
+              size={30}
+              className="mx-auto text-slate-300"
             />
-          ))}
 
-        </div>
+            <h3 className="mt-4 font-semibold text-slate-900">
+              No students found
+            </h3>
 
-      </main>
-    </div>
+            <p className="mt-1 text-sm text-slate-500">
+              Try another skill or adjust your filters.
+            </p>
+
+          </div>
+        ) : (
+          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+
+            {filteredStudents.map((student) => (
+              <StudentCard
+                key={student.id}
+                student={student}
+                favorite={favorites.includes(student.id)}
+                onFavorite={() => toggleFavorite(student.id)}
+              />
+            ))}
+
+          </div>
+        )}
+
+      </div>
+
+    </AppShell>
   );
 }
 
-function StudentCard({ student }) {
+function StudentCard({
+  student,
+  favorite,
+  onFavorite,
+}) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-100">
+    <article className="group rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-100">
 
       <div className="flex items-start justify-between">
 
         <div className="flex gap-4">
 
-          <div
-            className={`flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold ${student.color}`}
-          >
-            {student.name.charAt(0)}
+          <div className="relative">
+
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600">
+              {student.avatar}
+            </div>
+
+            {student.online && (
+              <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
+            )}
+
           </div>
 
           <div>
@@ -192,25 +267,52 @@ function StudentCard({ student }) {
               {student.name}
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
-              {student.department} · {student.semester}
+            <p className="mt-1 text-xs text-slate-500">
+              {student.department} · {student.semester} semester
             </p>
 
             <div className="mt-2 flex items-center gap-1 text-sm">
-              <Star size={15} className="fill-yellow-400 text-yellow-400" />
-              <span className="font-semibold">{student.rating}</span>
+
+              <Star
+                size={14}
+                className="fill-yellow-400 text-yellow-400"
+              />
+
+              <span className="font-semibold">
+                {student.rating}
+              </span>
+
               <span className="text-slate-400">
                 · {student.sessions} sessions
               </span>
+
             </div>
 
           </div>
 
         </div>
 
+        <button
+          onClick={onFavorite}
+          className={`rounded-lg p-2 ${
+            favorite
+              ? "bg-red-50 text-red-500"
+              : "text-slate-300 hover:bg-slate-50 hover:text-red-400"
+          }`}
+        >
+          <Heart
+            size={19}
+            className={favorite ? "fill-current" : ""}
+          />
+        </button>
+
       </div>
 
-      <div className="mt-6">
+      <p className="mt-5 line-clamp-2 text-sm leading-6 text-slate-500">
+        {student.about}
+      </p>
+
+      <div className="mt-5">
 
         <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
           Can teach
@@ -231,32 +333,11 @@ function StudentCard({ student }) {
 
       </div>
 
-      <div className="mt-5">
-
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-          Wants to learn
-        </p>
-
-        <div className="mt-2 flex flex-wrap gap-2">
-
-          {student.learns.map((skill) => (
-            <span
-              key={skill}
-              className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600"
-            >
-              {skill}
-            </span>
-          ))}
-
-        </div>
-
-      </div>
-
-      <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white hover:bg-indigo-700">
-        View Profile
+      <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700">
+        Request Session
         <ArrowRight size={16} />
       </button>
 
-    </div>
+    </article>
   );
 }
