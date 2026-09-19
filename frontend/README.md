@@ -1,16 +1,67 @@
-# React + Vite
+# SkillSync — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend for **SkillSync — Connect. Learn. Exchange.**
 
-Currently, two official plugins are available:
+A peer-to-peer campus learning platform that helps students connect, exchange skills, schedule learning sessions, and share feedback.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+- React
+- Vite
+- JavaScript
+- Tailwind CSS
+- React Router
+- Lucide React
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Folder Structure
 
-## Expanding the ESLint configuration
+```text
+src/
+├── assets/       # Images and static assets
+├── components/   # Reusable UI components
+├── data/         # Mock/static data
+├── hooks/        # Custom React hooks
+├── pages/        # Application screens
+├── services/     # API calls
+├── utils/        # Helper functions
+├── App.jsx       # Routes and app setup
+├── main.jsx      # React entry point
+└── index.css     # Global styles
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Run Locally
+
+From the `frontend` folder:
+
+```bash
+npm install
+npm run dev
+```
+
+Then open the URL shown in the terminal.
+
+## Current Screens
+
+- Login
+- Register
+- Dashboard
+- Discover
+- Profile
+- Sessions
+
+## Development
+
+Frontend development is done on the frontend feature branch.
+
+Before pushing changes:
+
+```bash
+git add .
+git commit -m "feat: your change"
+git push
+```
+
+## Project
+
+**SkillSync — Connect. Learn. Exchange.**
+Peer-to-peer learning platform for campus students.
