@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const matchRoutes = require("./routes/matchRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
+const roadmapRoutes = require("./routes/roadmapRoutes");
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/matches", matchRoutes);
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/roadmaps", roadmapRoutes);
 
 // Start server after DB connection
 const startServer = async () => {
