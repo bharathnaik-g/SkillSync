@@ -5,20 +5,19 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
-  LockKeyhole,
   Mail,
-  ShieldCheck,
   Sparkles,
+  User,
 } from "lucide-react";
 
-export default function Login() {
+export default function Register() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
+    name: "",
     email: "",
     password: "",
   });
@@ -26,8 +25,8 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!form.email || !form.password) {
-      setError("Please enter your email and password.");
+    if (!form.name || !form.email || !form.password) {
+      setError("Please complete all fields.");
       return;
     }
 
@@ -36,7 +35,11 @@ export default function Login() {
       return;
     }
 
-    // Temporary frontend navigation
+    if (form.password.length < 6) {
+      setError("Password must contain at least 6 characters.");
+      return;
+    }
+
     navigate("/dashboard");
   };
 
@@ -46,8 +49,7 @@ export default function Login() {
       {/* LEFT */}
       <section className="relative hidden overflow-hidden bg-indigo-600 p-12 text-white lg:flex lg:min-h-screen lg:flex-col lg:justify-between xl:p-16">
 
-        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-indigo-400/30 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-indigo-900/40 blur-3xl" />
+        <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-indigo-400/30 blur-3xl" />
 
         <div className="relative z-10">
           <div className="flex items-center gap-2">
@@ -63,58 +65,47 @@ export default function Login() {
 
         <div className="relative z-10 max-w-xl">
 
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-indigo-100 backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-emerald-300" />
-            Campus learning, reimagined
+          <div className="mb-6 inline-flex rounded-full bg-white/10 px-4 py-2 text-sm text-indigo-100">
+            Your campus learning community
           </div>
 
           <h1 className="text-5xl font-bold leading-tight xl:text-6xl">
-            Learn from your campus.
+            Learn something.
             <br />
             <span className="text-indigo-200">
-              Share what you know.
+              Teach something.
             </span>
           </h1>
 
-          <p className="mt-6 max-w-lg text-lg leading-8 text-indigo-100">
-            Find students who can teach what you want to learn and
-            share the skills you already know.
+          <p className="mt-6 text-lg leading-8 text-indigo-100">
+            SkillSync makes it easy to find peers, exchange knowledge
+            and grow together.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-3">
+          <div className="mt-10 space-y-4">
 
-            <span className="rounded-xl bg-white/10 px-4 py-3 text-sm font-medium">
-              Java
-            </span>
+            <div className="flex items-center gap-3">
+              <CheckCircle2 size={19} />
+              <span>Find students with the skills you need</span>
+            </div>
 
-            <ArrowRight size={16} />
+            <div className="flex items-center gap-3">
+              <CheckCircle2 size={19} />
+              <span>Share the skills you already know</span>
+            </div>
 
-            <span className="rounded-xl bg-white/10 px-4 py-3 text-sm font-medium">
-              DSA
-            </span>
-
-            <ArrowRight size={16} />
-
-            <span className="rounded-xl bg-white/10 px-4 py-3 text-sm font-medium">
-              Peer Learning
-            </span>
+            <div className="flex items-center gap-3">
+              <CheckCircle2 size={19} />
+              <span>Learn through peer-to-peer sessions</span>
+            </div>
 
           </div>
         </div>
 
-        <div className="relative z-10 flex gap-6 text-sm text-indigo-200">
+        <p className="relative z-10 text-sm text-indigo-200">
+          Connect. Learn. Exchange.
+        </p>
 
-          <span className="flex items-center gap-2">
-            <CheckCircle2 size={16} />
-            Learn together
-          </span>
-
-          <span className="flex items-center gap-2">
-            <CheckCircle2 size={16} />
-            Share knowledge
-          </span>
-
-        </div>
       </section>
 
       {/* RIGHT */}
@@ -124,29 +115,25 @@ export default function Login() {
 
           <div className="mb-12 lg:hidden">
             <div className="flex items-center gap-2">
+
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
                 <Sparkles size={18} />
               </div>
 
-              <span className="text-2xl font-bold text-slate-900">
+              <span className="text-2xl font-bold">
                 Skill<span className="text-indigo-600">Sync</span>
               </span>
+
             </div>
           </div>
 
-          <div>
-            <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-              <LockKeyhole size={20} />
-            </div>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Create your account
+          </h2>
 
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Welcome back
-            </h2>
-
-            <p className="mt-3 text-slate-500">
-              Sign in to continue your learning journey.
-            </p>
-          </div>
+          <p className="mt-3 text-slate-500">
+            Join your campus and start exchanging skills.
+          </p>
 
           {error && (
             <div className="mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -155,6 +142,30 @@ export default function Login() {
           )}
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Full Name
+              </label>
+
+              <div className="relative">
+                <User
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={form.name}
+                  onChange={(e) => {
+                    setForm({ ...form, name: e.target.value });
+                    setError("");
+                  }}
+                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                />
+              </div>
+            </div>
 
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
@@ -175,41 +186,27 @@ export default function Login() {
                     setForm({ ...form, email: e.target.value });
                     setError("");
                   }}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
                 />
               </div>
             </div>
 
             <div>
-              <div className="mb-2 flex justify-between">
-                <label className="text-sm font-semibold text-slate-700">
-                  Password
-                </label>
-
-                <button
-                  type="button"
-                  className="text-xs font-semibold text-indigo-600"
-                >
-                  Forgot password?
-                </button>
-              </div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Password
+              </label>
 
               <div className="relative">
 
-                <LockKeyhole
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  placeholder="Create a password"
                   value={form.password}
                   onChange={(e) => {
                     setForm({ ...form, password: e.target.value });
                     setError("");
                   }}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-12 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 pr-12 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
                 />
 
                 <button
@@ -223,33 +220,20 @@ export default function Login() {
                     <Eye size={18} />
                   )}
                 </button>
+
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-
-              <label className="flex items-center gap-2 text-sm text-slate-500">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-indigo-600"
-                />
-                Remember me
-              </label>
-
-              <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                <ShieldCheck size={14} />
-                Secure login
-              </span>
-
+              <p className="mt-2 text-xs text-slate-400">
+                Use at least 6 characters.
+              </p>
             </div>
 
             <button
               type="submit"
               className="group flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-700"
             >
-              Sign In
+              Create Account
+
               <ArrowRight
                 size={17}
                 className="transition-transform group-hover:translate-x-1"
@@ -264,23 +248,19 @@ export default function Login() {
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
-          <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+          <button className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
             <span className="font-bold">G</span>
             Continue with Google
           </button>
 
           <p className="mt-8 text-center text-sm text-slate-500">
-            New to SkillSync?{" "}
+            Already have an account?{" "}
             <Link
-              to="/register"
-              className="font-semibold text-indigo-600 hover:text-indigo-700"
+              to="/login"
+              className="font-semibold text-indigo-600"
             >
-              Create an account
+              Sign in
             </Link>
-          </p>
-
-          <p className="mt-10 text-center text-xs text-slate-400">
-            Connect. Learn. Exchange.
           </p>
 
         </div>
