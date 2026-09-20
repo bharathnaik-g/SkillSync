@@ -161,13 +161,12 @@ exports.updateMeetingLink = async (req, res) => {
       return res.status(404).json({ message: "Session not found" });
     }
 
-    // Check if user is participant (requester or mentor)
+    // Only the mentor (teacher) can set or update the meeting link
     const userId = req.user.id;
-    if (
-      session.requester.toString() !== userId &&
-      session.mentor.toString() !== userId
-    ) {
-      return res.status(403).json({ message: "Not authorized for this session" });
+    if (session.mentor.toString() !== userId) {
+      return res.status(403).json({
+        message: "Only the mentor can add or update the meeting link",
+      });
     }
 
     // Check if session is accepted

@@ -278,7 +278,7 @@ function SessionCard({
                     Google Meet:
                   </div>
 
-                  {!editingLink && (
+                  {!editingLink && isMentor && (
                     <button
                       onClick={() => setEditingLink(true)}
                       className="flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800"
@@ -289,7 +289,7 @@ function SessionCard({
                   )}
                 </div>
 
-                {editingLink ? (
+                {editingLink && isMentor ? (
                   <div className="mt-2 flex gap-2">
                     <input
                       type="url"
@@ -328,7 +328,9 @@ function SessionCard({
                   </div>
                 ) : (
                   <p className="mt-1 text-xs text-slate-500 italic">
-                    No Google Meet link added yet. Click "Add Link" above.
+                    {isMentor
+                      ? 'No Google Meet link added yet. Click "Add Link" above.'
+                      : "Waiting for mentor to add Google Meet link."}
                   </p>
                 )}
               </div>
