@@ -21,6 +21,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const [matches, setMatches] = useState([]);
+  const [nextSession, setNextSession] = useState(null);
+  const [sessionStats, setSessionStats] = useState({ learned: 0, taught: 0 });
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [ratingData, setRatingData] = useState({ averageRating: null, totalReviews: 0 });
   const [streakDays, setStreakDays] = useState(0);
 
