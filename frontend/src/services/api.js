@@ -69,6 +69,8 @@ export const sessionAPI = {
   updateSessionStatus: (id, status) => request(`/api/sessions/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
   updateMeetingLink: (id, meetingLink) => request(`/api/sessions/${id}/meeting-link`, { method: "PATCH", body: JSON.stringify({ meetingLink }) }),
   getMessages: (id) => request(`/api/sessions/${id}/messages`),
+  submitReview: (id, reviewData) => request(`/api/sessions/${id}/review`, { method: "POST", body: JSON.stringify(reviewData) }),
+  getUserReviews: (userId) => request(`/api/sessions/reviews/${userId}`),
 };
 
 export const roadmapAPI = {

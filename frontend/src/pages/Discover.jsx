@@ -505,8 +505,14 @@ function StudentCard({ student, favorite, onFavorite, onRequest }) {
 
               <div className="mt-2 flex items-center gap-1 text-sm">
                 <Star size={14} className="fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold">4.9</span>
-                <span className="text-slate-400">· Peer Mentor</span>
+                <span className="font-semibold">
+                  {student.rating ? `${student.rating} ★` : "New"}
+                </span>
+                <span className="text-slate-400">
+                  {student.totalReviews > 0
+                    ? `· ${student.totalReviews} review${student.totalReviews > 1 ? "s" : ""}`
+                    : "· Peer Mentor"}
+                </span>
               </div>
             </div>
           </div>

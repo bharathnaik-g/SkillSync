@@ -21,11 +21,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [matches, setMatches] = useState([]);
-  const [nextSession, setNextSession] = useState(null);
-  const [sessionStats, setSessionStats] = useState({ learned: 0, taught: 0 });
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [ratingData, setRatingData] = useState({ averageRating: null, totalReviews: 0 });
+  const [streakDays, setStreakDays] = useState(0);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -40,15 +37,30 @@ export default function Dashboard() {
           console.error("Matches load error:", e);
         }
 
-        // Load sessions
+        const userId = user?._id || user?.id;
+
+        // Load reviews & rating for current user
+        if (userId) {
+          try {
+            const reviewRes = await sessionAPI.getUserReviews(userId);
+            setRatingData({
+              averageRating: reviewRes.averageRating,
+              totalReviews: reviewRes.totalReviews || 0,
+            });
+          } catch (e) {
+            console.error("Reviews load error:", e);
+          }
+        }
+
+        // Load sessions & calculate streak
         try {
           const sessionRes = await sessionAPI.getSessions();
           const allSessions = sessionRes.sessions || [];
 
-          const userId = user?._id || user?.id;
-
           let learnedCount = 0;
           let taughtCount = 0;
+
+          const activityDates = new Set();
 
           allSessions.forEach((s) => {
             if (s.status === "completed" || s.status === "accepted") {
@@ -57,10 +69,36 @@ export default function Dashboard() {
               } else {
                 taughtCount++;
               }
+
+              const dStr = new Date(s.updatedAt || s.createdAt).toISOString().split("T")[0];
+              activityDates.add(dStr);
             }
           });
 
           setSessionStats({ learned: learnedCount, taught: taughtCount });
+
+          // Calculate real streak
+          let streak = 0;
+          if (activityDates.size > 0) {
+            let curr = new Date();
+            const todayStr = curr.toISOString().split("T")[0];
+            curr.setDate(curr.getDate() - 1);
+            const yestStr = curr.toISOString().split("T")[0];
+
+            if (activityDates.has(todayStr) || activityDates.has(yestStr)) {
+              let checkDate = activityDates.has(todayStr) ? new Date() : curr;
+              while (true) {
+                const dateStr = checkDate.toISOString().split("T")[0];
+                if (activityDates.has(dateStr)) {
+                  streak++;
+                  checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                  break;
+                }
+              }
+            }
+          }
+          setStreakDays(streak);
 
           // Find upcoming session
           const upcoming = allSessions.find((s) => s.status === "accepted");
@@ -169,15 +207,27 @@ export default function Dashboard() {
           <Stat
             icon={<Star />}
             label="Peer Rating"
-            value="4.9"
-            detail="Top Mentor"
+            value={
+              ratingData.averageRating
+                ? `${ratingData.averageRating} ★`
+                : "New"
+            }
+            detail={
+              ratingData.totalReviews > 0
+                ? `${ratingData.totalReviews} review${
+                    ratingData.totalReviews > 1 ? "s" : ""
+                  }`
+                : "No reviews yet"
+            }
           />
 
           <Stat
             icon={<Flame />}
             label="Learning Streak"
-            value="5 days"
-            detail="Keep it up!"
+            value={`${streakDays} day${streakDays !== 1 ? "s" : ""}`}
+            detail={
+              streakDays > 0 ? "Active learning" : "Complete a session to start streak"
+            }
           />
         </section>
 

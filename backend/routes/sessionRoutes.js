@@ -10,6 +10,8 @@ const {
   updateSessionStatus,
   updateMeetingLink,
   getSessionMessages,
+  submitReview,
+  getUserReviews,
 } = require("../controllers/sessionController");
 
 const protect = require("../middleware/authMiddleware");
@@ -28,5 +30,11 @@ router.patch("/:id/meeting-link", protect, updateMeetingLink);
 
 // Fetch chat message history for an accepted session
 router.get("/:id/messages", protect, getSessionMessages);
+
+// Submit review for session
+router.post("/:id/review", protect, submitReview);
+
+// Get reviews for a mentor/user
+router.get("/reviews/:userId", protect, getUserReviews);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Session = require("../models/Session");
 const Message = require("../models/Message");
+const Review = require("../models/Review");
 
 // 1. Create a session request
 exports.createSession = async (req, res) => {
@@ -224,5 +225,93 @@ exports.getSessionMessages = async (req, res) => {
   } catch (error) {
     console.error("Get Session Messages Error:", error);
     return res.status(500).json({ message: "Server error while fetching chat messages" });
+  }
+};
+
+
+// 6. Submit a review for a completed/accepted session
+exports.submitReview = async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const sessionId = req.params.id;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating between 1 and 5 is required" });
+    }
+
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    const userId = req.user.id;
+    if (
+      session.requester.toString() !== userId &&
+      session.mentor.toString() !== userId
+    ) {
+      return res.status(403).json({ message: "Not authorized to review this session" });
+    }
+
+    if (session.status !== "accepted" && session.status !== "completed") {
+      return res.status(400).json({ message: "Can only review accepted or completed sessions" });
+    }
+
+    // Identify who is being reviewed
+    const mentorId =
+      session.requester.toString() === userId
+        ? session.mentor
+        : session.requester;
+
+    // Create or update review
+    const review = await Review.findOneAndUpdate(
+      { session: sessionId, reviewer: userId },
+      {
+        session: sessionId,
+        reviewer: userId,
+        mentor: mentorId,
+        rating: Number(rating),
+        comment: (comment || "").trim(),
+      },
+      { upsert: true, new: true, runValidators: true }
+    ).populate("reviewer", "name email");
+
+    // Mark session as completed
+    session.status = "completed";
+    await session.save();
+
+    return res.status(200).json({
+      message: "Review submitted successfully",
+      review,
+      session,
+    });
+  } catch (error) {
+    console.error("Submit Review Error:", error);
+    return res.status(500).json({ message: "Server error while submitting review" });
+  }
+};
+
+
+// 7. Get reviews for a specific user/mentor
+exports.getUserReviews = async (req, res) => {
+  try {
+    const targetUserId = req.params.userId || req.user.id;
+    const reviews = await Review.find({ mentor: targetUserId })
+      .populate("reviewer", "name email")
+      .sort({ createdAt: -1 });
+
+    const totalReviews = reviews.length;
+    const averageRating =
+      totalReviews > 0
+        ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
+        : null;
+
+    return res.status(200).json({
+      totalReviews,
+      averageRating: averageRating ? Number(averageRating) : null,
+      reviews,
+    });
+  } catch (error) {
+    console.error("Get User Reviews Error:", error);
+    return res.status(500).json({ message: "Server error while fetching reviews" });
   }
 };

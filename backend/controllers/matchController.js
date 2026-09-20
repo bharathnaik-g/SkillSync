@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Review = require("../models/Review");
 
 // FIND STUDENTS WHO CAN TEACH SKILLS
 // OR SEARCH STUDENTS BY QUERY
@@ -33,7 +34,26 @@ exports.findMatches = async (req, res) => {
       };
     }
 
-    const matches = await User.find(filter).select("-password").sort({ updatedAt: -1 });
+    const rawMatches = await User.find(filter).select("-password").sort({ updatedAt: -1 });
+
+    // Populate actual ratings and review count dynamically for each match
+    const matches = await Promise.all(
+      rawMatches.map(async (student) => {
+        const studentObj = student.toObject();
+        const reviews = await Review.find({ mentor: student._id });
+        const totalReviews = reviews.length;
+        const avgRating =
+          totalReviews > 0
+            ? Number((reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1))
+            : null;
+
+        return {
+          ...studentObj,
+          rating: avgRating,
+          totalReviews,
+        };
+      })
+    );
 
     let message = "";
     if (matches.length === 0 && !queryStr && (!currentUser.skillsToLearn || currentUser.skillsToLearn.length === 0)) {

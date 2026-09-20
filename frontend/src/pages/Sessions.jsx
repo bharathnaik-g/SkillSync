@@ -10,9 +10,11 @@ import {
   ExternalLink,
   Edit2,
   Save,
+  Star,
 } from "lucide-react";
 import AppShell from "../components/AppShell";
 import SessionChatModal from "../components/SessionChatModal";
+import ReviewModal from "../components/ReviewModal";
 import { useAuth } from "../context/AuthContext";
 import { sessionAPI } from "../services/api";
 
@@ -23,6 +25,7 @@ export default function Sessions() {
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
   const [activeChatSession, setActiveChatSession] = useState(null);
+  const [activeReviewSession, setActiveReviewSession] = useState(null);
 
   const [tab, setTab] = useState("All");
 
@@ -151,6 +154,7 @@ export default function Sessions() {
                   handleUpdateMeetingLink(session._id, link)
                 }
                 onOpenChat={() => setActiveChatSession(session)}
+                onOpenReview={() => setActiveReviewSession(session)}
               />
             ))}
           </div>
@@ -162,6 +166,16 @@ export default function Sessions() {
         <SessionChatModal
           session={activeChatSession}
           onClose={() => setActiveChatSession(null)}
+        />
+      )}
+
+      {/* Review Modal */}
+      {activeReviewSession && (
+        <ReviewModal
+          session={activeReviewSession}
+          currentUserId={user?._id || user?.id}
+          onClose={() => setActiveReviewSession(null)}
+          onSuccess={fetchSessions}
         />
       )}
     </AppShell>
@@ -176,6 +190,7 @@ function SessionCard({
   onReject,
   onSaveMeetingLink,
   onOpenChat,
+  onOpenReview,
 }) {
   const [editingLink, setEditingLink] = useState(false);
   const [linkInput, setLinkInput] = useState(session.meetingLink || "");
@@ -381,13 +396,23 @@ function SessionCard({
           )}
 
           {isAccepted && (
-            <button
-              onClick={onOpenChat}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 shadow-md shadow-indigo-100 transition"
-            >
-              <MessageCircle size={17} />
-              Open Live Chat
-            </button>
+            <>
+              <button
+                onClick={onOpenChat}
+                className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 shadow-md shadow-indigo-100 transition"
+              >
+                <MessageCircle size={17} />
+                Open Live Chat
+              </button>
+
+              <button
+                onClick={onOpenReview}
+                className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-sm font-semibold text-amber-700 hover:bg-amber-100 transition"
+              >
+                <Star size={16} className="fill-amber-500 text-amber-500" />
+                {session.status === "completed" ? "Edit Review" : "End & Review"}
+              </button>
+            </>
           )}
         </div>
       </div>

@@ -7,10 +7,11 @@ import {
   Trash2,
   Loader2,
   AlertCircle,
+  Star,
 } from "lucide-react";
 import AppShell from "../components/AppShell";
 import { useAuth } from "../context/AuthContext";
-import { profileAPI } from "../services/api";
+import { profileAPI, sessionAPI } from "../services/api";
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
@@ -35,6 +36,9 @@ export default function Profile() {
 
   const [newTeach, setNewTeach] = useState("");
   const [newLearn, setNewLearn] = useState("");
+
+  const [userReviews, setUserReviews] = useState([]);
+  const [avgRating, setAvgRating] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -64,6 +68,17 @@ export default function Profile() {
             typeof s === "string" ? { name: s, level: "Beginner" } : s
           )
         );
+
+        // Fetch user reviews
+        if (userData?._id || userData?.id) {
+          try {
+            const reviewRes = await sessionAPI.getUserReviews(userData._id || userData.id);
+            setUserReviews(reviewRes.reviews || []);
+            setAvgRating(reviewRes.averageRating);
+          } catch (e) {
+            console.error("Failed to load reviews:", e);
+          }
+        }
       } catch (err) {
         setError("Failed to load profile. Please refresh.");
       } finally {
@@ -392,6 +407,69 @@ export default function Profile() {
                   </button>
                 ))}
               </div>
+            </div>
+          </section>
+
+          {/* Peer Reviews Section */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="font-bold text-slate-900">Peer Reviews & Ratings</h2>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  Feedback from students who completed learning sessions with you.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-1.5 rounded-xl bg-amber-50 border border-amber-200 px-3 py-1.5 text-sm font-bold text-amber-800">
+                <Star size={16} className="fill-amber-400 text-amber-400" />
+                {avgRating ? `${avgRating} / 5` : "No ratings yet"}
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {userReviews.length === 0 ? (
+                <p className="py-6 text-center text-xs text-slate-400">
+                  No peer reviews received yet. Complete session requests to build your mentor rating!
+                </p>
+              ) : (
+                userReviews.map((rev) => (
+                  <div
+                    key={rev._id}
+                    className="rounded-xl border border-slate-100 bg-slate-50/70 p-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-xs text-slate-900">
+                          {rev.reviewer?.name || "Student Peer"}
+                        </span>
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              size={12}
+                              className={
+                                i < rev.rating
+                                  ? "fill-amber-400 text-amber-400"
+                                  : "text-slate-300"
+                              }
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <span className="text-[11px] text-slate-400">
+                        {new Date(rev.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    {rev.comment && (
+                      <p className="mt-2 text-xs text-slate-600 italic">
+                        "{rev.comment}"
+                      </p>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </section>
 
