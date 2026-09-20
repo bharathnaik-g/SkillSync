@@ -10,7 +10,7 @@ import {
   UserRound,
   X,
   LogOut,
-  Sparkles,
+  Map,
   MessageSquare,
   ArrowRight,
 } from "lucide-react";
@@ -66,9 +66,9 @@ export default function AppShell({ children }) {
       icon: CalendarDays,
     },
     {
-      name: "AI Roadmaps",
+      name: "Roadmaps",
       path: "/roadmap",
-      icon: Sparkles,
+      icon: Map,
     },
     {
       name: "Profile",

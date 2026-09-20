@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Sparkles,
+  Map,
   BookOpen,
   Calendar,
   CheckCircle2,
@@ -85,14 +85,14 @@ export default function Roadmap() {
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2 text-sm font-semibold text-indigo-600">
-              <Sparkles size={16} />
-              AI Learning Engine
+              <Map size={16} />
+              Structured Learning Paths
             </div>
             <h1 className="mt-1 text-3xl font-bold text-slate-900">
-              AI Skill Roadmaps
+              Skill Roadmaps
             </h1>
             <p className="mt-1 text-slate-500">
-              Generate personalized step-by-step learning paths powered by Gemini AI.
+              Generate personalized step-by-step learning paths for any skill.
             </p>
           </div>
 
@@ -126,14 +126,14 @@ export default function Roadmap() {
           <div className="mx-auto mt-8 max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-5">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                <Sparkles size={24} />
+                <Map size={24} />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  Generate Custom AI Roadmap
+                  Generate Custom Roadmap
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Tell Gemini what you want to master.
+                  Specify what skill you want to master.
                 </p>
               </div>
             </div>
@@ -195,11 +195,11 @@ export default function Roadmap() {
                 {generating ? (
                   <>
                     <Loader2 size={18} className="animate-spin" />
-                    Generating with Gemini AI...
+                    Generating roadmap...
                   </>
                 ) : (
                   <>
-                    <Sparkles size={18} />
+                    <Map size={18} />
                     Generate Roadmap
                   </>
                 )}
@@ -225,7 +225,7 @@ export default function Roadmap() {
                     No roadmaps generated yet
                   </p>
                   <p className="mt-1 text-xs text-slate-400">
-                    Create your first AI-generated learning plan.
+                    Create your first structured learning plan.
                   </p>
                   <button
                     onClick={() => setActiveTab("generate")}

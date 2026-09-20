@@ -1,4 +1,4 @@
-import { Sparkles, CheckCircle2 } from "lucide-react";
+import { BookOpen, CheckCircle2 } from "lucide-react";
 
 export default function AuthLayout({ children, type = "login" }) {
   const register = type === "register";
@@ -14,7 +14,7 @@ export default function AuthLayout({ children, type = "login" }) {
 
         <div className="relative z-10 flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-            <Sparkles size={20} />
+            <BookOpen size={20} />
           </div>
 
           <span className="text-2xl font-bold">
@@ -76,7 +76,7 @@ export default function AuthLayout({ children, type = "login" }) {
           {/* Mobile logo */}
           <div className="mb-10 flex items-center gap-2 lg:hidden">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-              <Sparkles size={18} />
+              <BookOpen size={18} />
             </div>
 
             <span className="text-2xl font-bold text-slate-900">

@@ -10,7 +10,7 @@ import {
   Users,
   Zap,
   Loader2,
-  Sparkles,
+  Map,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
@@ -101,7 +101,7 @@ export default function Dashboard() {
           <p className="text-sm font-semibold text-indigo-600">{currentDate}</p>
 
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-            Welcome back, {user?.name || "Student"} 👋
+            Welcome back, {user?.name || "Student"}
           </h1>
 
           <p className="mt-2 text-slate-500">
@@ -259,12 +259,12 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Quick AI Roadmap Banner & Profile Strength */}
+          {/* Quick Skill Roadmap Banner */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-600">
-                <Sparkles size={16} />
-                Gemini AI Feature
+                <Map size={16} />
+                Skill Roadmaps
               </div>
 
               <h2 className="mt-2 text-lg font-bold text-slate-900">
@@ -272,7 +272,7 @@ export default function Dashboard() {
               </h2>
 
               <p className="mt-2 text-sm text-slate-500">
-                Generate a custom step-by-step roadmap for any skill using AI.
+                Generate a custom step-by-step roadmap for any skill.
               </p>
             </div>
 
@@ -280,7 +280,7 @@ export default function Dashboard() {
               to="/roadmap"
               className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-100 hover:bg-indigo-700 transition"
             >
-              Generate AI Roadmap
+              Explore Skill Roadmaps
               <ArrowRight size={16} />
             </Link>
           </div>
