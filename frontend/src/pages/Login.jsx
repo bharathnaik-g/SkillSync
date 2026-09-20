@@ -7,11 +7,14 @@ import {
   LockKeyhole,
   Mail,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import AuthLayout from "../components/AuthLayout";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,7 +25,7 @@ export default function Login() {
     password: "",
   });
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
 
     if (!form.email || !form.password) {
@@ -35,17 +38,23 @@ export default function Login() {
       return;
     }
 
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      setLoading(true);
+      setError("");
+      await login({
+        email: form.email.trim(),
+        password: form.password,
+      });
       navigate("/dashboard");
-    }, 900);
+    } catch (err) {
+      setError(err.message || "Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <AuthLayout>
-
       <div>
         <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
           <LockKeyhole size={20} />
@@ -66,18 +75,13 @@ export default function Login() {
         </div>
       )}
 
-      <form
-        onSubmit={submit}
-        className="mt-8 space-y-5"
-      >
-
+      <form onSubmit={submit} className="mt-8 space-y-5">
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-700">
             College Email
           </label>
 
           <div className="relative">
-
             <Mail
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -96,14 +100,11 @@ export default function Login() {
               }}
               className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
             />
-
           </div>
         </div>
 
         <div>
-
           <div className="mb-2 flex justify-between">
-
             <label className="text-sm font-semibold text-slate-700">
               Password
             </label>
@@ -114,11 +115,9 @@ export default function Login() {
             >
               Forgot password?
             </button>
-
           </div>
 
           <div className="relative">
-
             <LockKeyhole
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -140,23 +139,15 @@ export default function Login() {
 
             <button
               type="button"
-              onClick={() =>
-                setShowPassword(!showPassword)
-              }
+              onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
             >
-              {showPassword ? (
-                <EyeOff size={18} />
-              ) : (
-                <Eye size={18} />
-              )}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
-
           </div>
         </div>
 
         <div className="flex items-center justify-between">
-
           <label className="flex items-center gap-2 text-sm text-slate-500">
             <input
               type="checkbox"
@@ -169,23 +160,27 @@ export default function Login() {
             <ShieldCheck size={14} />
             Secure login
           </span>
-
         </div>
 
         <button
           disabled={loading}
           className="group flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-700 disabled:opacity-60"
         >
-          {loading ? "Signing in..." : "Sign In"}
-
-          {!loading && (
-            <ArrowRight
-              size={17}
-              className="transition-transform group-hover:translate-x-1"
-            />
+          {loading ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              Signing in...
+            </>
+          ) : (
+            <>
+              Sign In
+              <ArrowRight
+                size={17}
+                className="transition-transform group-hover:translate-x-1"
+              />
+            </>
           )}
         </button>
-
       </form>
 
       <div className="my-7 flex items-center gap-4">
@@ -201,14 +196,10 @@ export default function Login() {
 
       <p className="mt-8 text-center text-sm text-slate-500">
         New to SkillSync?{" "}
-        <Link
-          to="/register"
-          className="font-semibold text-indigo-600"
-        >
+        <Link to="/register" className="font-semibold text-indigo-600">
           Create an account
         </Link>
       </p>
-
     </AuthLayout>
   );
 }

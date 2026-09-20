@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 
 const sessionSchema = new mongoose.Schema(
@@ -28,6 +27,11 @@ const sessionSchema = new mongoose.Schema(
     scheduledAt: {
       type: Date,
       default: null
+    },
+
+    meetingLink: {
+      type: String,
+      default: ""
     },
 
     status: {

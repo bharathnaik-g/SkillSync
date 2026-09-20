@@ -1,42 +1,81 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Camera,
   Check,
   Plus,
   Save,
   Trash2,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import AppShell from "../components/AppShell";
+import { useAuth } from "../context/AuthContext";
+import { profileAPI } from "../services/api";
 
 export default function Profile() {
+  const { user, updateUser } = useAuth();
+
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [profile, setProfile] = useState({
-    name: "Bharath Naik",
-    email: "student@college.edu",
-    department: "Information Science",
+    name: "",
+    email: "",
+    college: "",
+    department: "",
     semester: "5",
-    bio: "Full stack developer interested in GenAI, cybersecurity and building useful products.",
+    bio: "",
     preference: "Online",
   });
 
-  const [teachSkills, setTeachSkills] = useState([
-    { name: "Java", level: "Intermediate" },
-    { name: "HTML", level: "Advanced" },
-  ]);
-
-  const [learnSkills, setLearnSkills] = useState([
-    { name: "DSA", level: "Beginner" },
-    { name: "React", level: "Beginner" },
-  ]);
+  const [teachSkills, setTeachSkills] = useState([]);
+  const [learnSkills, setLearnSkills] = useState([]);
 
   const [newTeach, setNewTeach] = useState("");
   const [newLearn, setNewLearn] = useState("");
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const res = await profileAPI.getProfile();
+        const userData = res.user;
+
+        setProfile({
+          name: userData.name || "",
+          email: userData.email || "",
+          college: userData.college || "",
+          department: userData.department || "Computer Science",
+          semester: userData.year ? String(userData.year) : "5",
+          bio: userData.bio || "",
+          preference: "Online",
+        });
+
+        setTeachSkills(
+          (userData.skillsToTeach || []).map((s) =>
+            typeof s === "string" ? { name: s, level: "Intermediate" } : s
+          )
+        );
+
+        setLearnSkills(
+          (userData.skillsToLearn || []).map((s) =>
+            typeof s === "string" ? { name: s, level: "Beginner" } : s
+          )
+        );
+      } catch (err) {
+        setError("Failed to load profile. Please refresh.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const completion = useMemo(() => {
-
     let score = 0;
-
     if (profile.name) score += 15;
     if (profile.department) score += 15;
     if (profile.semester) score += 10;
@@ -46,16 +85,10 @@ export default function Profile() {
     if (profile.preference) score += 15;
 
     return score;
-
   }, [profile, teachSkills, learnSkills]);
 
   const addSkill = (type) => {
-
-    const value =
-      type === "teach"
-        ? newTeach.trim()
-        : newLearn.trim();
-
+    const value = type === "teach" ? newTeach.trim() : newLearn.trim();
     if (!value) return;
 
     const skill = {
@@ -72,59 +105,70 @@ export default function Profile() {
     }
   };
 
-  const updateSkill = (
-    type,
-    index,
-    key,
-    value
-  ) => {
-
-    const list =
-      type === "teach"
-        ? [...teachSkills]
-        : [...learnSkills];
-
+  const updateSkill = (type, index, key, value) => {
+    const list = type === "teach" ? [...teachSkills] : [...learnSkills];
     list[index] = {
       ...list[index],
       [key]: value,
     };
 
-    type === "teach"
-      ? setTeachSkills(list)
-      : setLearnSkills(list);
+    type === "teach" ? setTeachSkills(list) : setLearnSkills(list);
   };
 
   const deleteSkill = (type, index) => {
-
     if (type === "teach") {
-      setTeachSkills(
-        teachSkills.filter((_, i) => i !== index)
-      );
+      setTeachSkills(teachSkills.filter((_, i) => i !== index));
     } else {
-      setLearnSkills(
-        learnSkills.filter((_, i) => i !== index)
-      );
+      setLearnSkills(learnSkills.filter((_, i) => i !== index));
     }
   };
 
-  const saveProfile = () => {
+  const saveProfile = async () => {
+    try {
+      setSaving(true);
+      setError("");
 
-    setSaved(true);
+      const payload = {
+        name: profile.name,
+        college: profile.college,
+        department: profile.department,
+        year: parseInt(profile.semester) || 1,
+        bio: profile.bio,
+        skillsToTeach: teachSkills.map((s) => (typeof s === "string" ? s : s.name)),
+        skillsToLearn: learnSkills.map((s) => (typeof s === "string" ? s : s.name)),
+      };
 
-    setTimeout(() => {
-      setSaved(false);
-    }, 2500);
+      const res = await profileAPI.updateProfile(payload);
+      updateUser(res.user);
+
+      setSaved(true);
+      setTimeout(() => {
+        setSaved(false);
+      }, 3000);
+    } catch (err) {
+      setError(err.message || "Failed to save profile");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const initial = profile.name ? profile.name.charAt(0).toUpperCase() : "U";
+
+  if (loading) {
+    return (
+      <AppShell>
+        <div className="flex h-96 items-center justify-center">
+          <Loader2 size={32} className="animate-spin text-indigo-600" />
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
-
       <div className="mx-auto max-w-5xl px-5 py-7 sm:px-8">
-
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-
           <div>
-
             <p className="text-sm font-semibold text-indigo-600">
               Your identity
             </p>
@@ -136,13 +180,10 @@ export default function Profile() {
             <p className="mt-2 text-slate-500">
               Tell your campus what you know and want to learn.
             </p>
-
           </div>
 
           <div className="w-full sm:w-48">
-
             <div className="flex justify-between text-xs">
-
               <span className="font-medium text-slate-500">
                 Profile completion
               </span>
@@ -150,50 +191,46 @@ export default function Profile() {
               <span className="font-bold text-indigo-600">
                 {completion}%
               </span>
-
             </div>
 
             <div className="mt-2 h-2 rounded-full bg-slate-100">
-
               <div
                 className="h-full rounded-full bg-indigo-600 transition-all"
                 style={{ width: `${completion}%` }}
               />
-
             </div>
-
           </div>
-
         </div>
 
         {saved && (
           <div className="mt-6 flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
             <Check size={17} />
-            Profile saved successfully.
+            Profile saved successfully to MongoDB!
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-6 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+            <AlertCircle size={17} />
+            {error}
           </div>
         )}
 
         <div className="mt-7 space-y-6">
-
           {/* Basic */}
           <section className="rounded-2xl border border-slate-200 bg-white p-6">
-
             <div className="flex items-center gap-4">
-
               <div className="relative">
-
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-600">
-                  B
+                  {initial}
                 </div>
 
                 <button className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg">
                   <Camera size={15} />
                 </button>
-
               </div>
 
               <div>
-
                 <h2 className="font-bold text-slate-900">
                   Basic Information
                 </h2>
@@ -201,13 +238,10 @@ export default function Profile() {
                 <p className="mt-1 text-sm text-slate-500">
                   Keep your student profile up to date.
                 </p>
-
               </div>
-
             </div>
 
             <div className="mt-7 grid gap-5 md:grid-cols-2">
-
               <Input
                 label="Full Name"
                 value={profile.name}
@@ -237,9 +271,8 @@ export default function Profile() {
               />
 
               <div>
-
                 <label className="mb-2 block text-sm font-semibold text-slate-700">
-                  Semester
+                  Semester / Year
                 </label>
 
                 <select
@@ -252,19 +285,16 @@ export default function Profile() {
                   }
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
                 >
-                  {[1,2,3,4,5,6,7,8].map((sem) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
                     <option key={sem} value={sem}>
                       {sem}th Semester
                     </option>
                   ))}
                 </select>
-
               </div>
-
             </div>
 
             <div className="mt-5">
-
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Bio
               </label>
@@ -280,9 +310,7 @@ export default function Profile() {
                 }
                 className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
               />
-
             </div>
-
           </section>
 
           <SkillEditor
@@ -292,12 +320,8 @@ export default function Profile() {
             input={newTeach}
             setInput={setNewTeach}
             add={() => addSkill("teach")}
-            update={(i, key, value) =>
-              updateSkill("teach", i, key, value)
-            }
-            remove={(i) =>
-              deleteSkill("teach", i)
-            }
+            update={(i, key, value) => updateSkill("teach", i, key, value)}
+            remove={(i) => deleteSkill("teach", i)}
           />
 
           <SkillEditor
@@ -307,19 +331,14 @@ export default function Profile() {
             input={newLearn}
             setInput={setNewLearn}
             add={() => addSkill("learn")}
-            update={(i, key, value) =>
-              updateSkill("learn", i, key, value)
-            }
-            remove={(i) =>
-              deleteSkill("learn", i)
-            }
+            update={(i, key, value) => updateSkill("learn", i, key, value)}
+            remove={(i) => deleteSkill("learn", i)}
           />
 
           {/* Availability */}
           <section className="rounded-2xl border border-slate-200 bg-white p-6">
-
             <h2 className="font-bold text-slate-900">
-              Availability
+              Availability & Preferences
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
@@ -327,7 +346,6 @@ export default function Profile() {
             </p>
 
             <div className="mt-5 grid gap-4 md:grid-cols-3">
-
               <select className="rounded-xl border border-slate-200 px-4 py-3 text-sm">
                 <option>Saturday</option>
                 <option>Sunday</option>
@@ -347,101 +365,64 @@ export default function Profile() {
                 defaultValue="12:00"
                 className="rounded-xl border border-slate-200 px-4 py-3 text-sm"
               />
-
             </div>
 
             <div className="mt-6">
-
               <p className="mb-3 text-sm font-semibold text-slate-700">
                 Session preference
               </p>
 
               <div className="flex flex-wrap gap-3">
-
-                {["Online", "Offline", "Both"].map(
-                  (option) => (
-                    <button
-                      key={option}
-                      onClick={() =>
-                        setProfile({
-                          ...profile,
-                          preference: option,
-                        })
-                      }
-                      className={`rounded-xl border px-5 py-2.5 text-sm font-medium transition ${
-                        profile.preference === option
-                          ? "border-indigo-600 bg-indigo-50 text-indigo-600"
-                          : "border-slate-200 text-slate-500"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  )
-                )}
-
+                {["Online", "Offline", "Both"].map((option) => (
+                  <button
+                    key={option}
+                    onClick={() =>
+                      setProfile({
+                        ...profile,
+                        preference: option,
+                      })
+                    }
+                    className={`rounded-xl border px-5 py-2.5 text-sm font-medium transition ${
+                      profile.preference === option
+                        ? "border-indigo-600 bg-indigo-50 text-indigo-600 font-semibold"
+                        : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
               </div>
-
             </div>
-
-          </section>
-
-          {/* Activity */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-6">
-
-            <h2 className="font-bold text-slate-900">
-              Your Activity
-            </h2>
-
-            <div className="mt-5 grid gap-4 sm:grid-cols-3">
-
-              <Activity
-                label="Average rating"
-                value="4.8"
-              />
-
-              <Activity
-                label="Completed sessions"
-                value="12"
-              />
-
-              <Activity
-                label="Skills exchanged"
-                value="18"
-              />
-
-            </div>
-
           </section>
 
           <div className="flex justify-end">
-
             <button
               onClick={saveProfile}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700"
+              disabled={saving}
+              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 disabled:opacity-60 transition"
             >
-              <Save size={17} />
-              Save Profile
+              {saving ? (
+                <>
+                  <Loader2 size={17} className="animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save size={17} />
+                  Save Profile
+                </>
+              )}
             </button>
-
           </div>
-
         </div>
-
       </div>
-
     </AppShell>
   );
 }
 
-function Input({
-  label,
-  value,
-  onChange,
-  disabled,
-}) {
+function Input({ label, value, onChange, disabled }) {
   return (
     <div>
-
       <label className="mb-2 block text-sm font-semibold text-slate-700">
         {label}
       </label>
@@ -454,7 +435,6 @@ function Input({
           disabled ? "bg-slate-50 text-slate-400" : "bg-white"
         }`}
       />
-
     </div>
   );
 }
@@ -471,36 +451,22 @@ function SkillEditor({
 }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-6">
+      <h2 className="font-bold text-slate-900">{title}</h2>
 
-      <h2 className="font-bold text-slate-900">
-        {title}
-      </h2>
-
-      <p className="mt-1 text-sm text-slate-500">
-        {description}
-      </p>
+      <p className="mt-1 text-sm text-slate-500">{description}</p>
 
       <div className="mt-5 space-y-3">
-
         {skills.map((skill, index) => (
-          <div
-            key={index}
-            className="flex gap-3"
-          >
-
+          <div key={index} className="flex gap-3">
             <input
-              value={skill.name}
-              onChange={(e) =>
-                update(index, "name", e.target.value)
-              }
+              value={typeof skill === "string" ? skill : skill.name}
+              onChange={(e) => update(index, "name", e.target.value)}
               className="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-indigo-500"
             />
 
             <select
-              value={skill.level}
-              onChange={(e) =>
-                update(index, "level", e.target.value)
-              }
+              value={typeof skill === "object" ? skill.level : "Intermediate"}
+              onChange={(e) => update(index, "level", e.target.value)}
               className="w-32 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"
             >
               <option>Beginner</option>
@@ -510,21 +476,17 @@ function SkillEditor({
 
             <button
               onClick={() => remove(index)}
-              className="rounded-xl p-3 text-slate-400 hover:bg-red-50 hover:text-red-500"
+              className="rounded-xl p-3 text-slate-400 hover:bg-red-50 hover:text-red-500 transition"
             >
               <Trash2 size={17} />
             </button>
-
           </div>
         ))}
 
         <div className="flex gap-3">
-
           <input
             value={input}
-            onChange={(e) =>
-              setInput(e.target.value)
-            }
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
@@ -536,33 +498,15 @@ function SkillEditor({
           />
 
           <button
+            type="button"
             onClick={add}
-            className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white"
+            className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 transition"
           >
             <Plus size={16} />
             Add
           </button>
-
         </div>
-
       </div>
-
     </section>
-  );
-}
-
-function Activity({ label, value }) {
-  return (
-    <div className="rounded-xl bg-slate-50 p-5">
-
-      <p className="text-sm text-slate-500">
-        {label}
-      </p>
-
-      <p className="mt-2 text-2xl font-bold text-slate-900">
-        {value}
-      </p>
-
-    </div>
   );
 }

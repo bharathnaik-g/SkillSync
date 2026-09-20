@@ -7,11 +7,14 @@ import {
   LockKeyhole,
   Mail,
   User,
+  Loader2,
 } from "lucide-react";
 import AuthLayout from "../components/AuthLayout";
+import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -26,7 +29,7 @@ export default function Register() {
   const passwordScore =
     form.password.length >= 10
       ? 3
-      : form.password.length >= 6
+      : form.password.length >= 8
       ? 2
       : form.password.length > 0
       ? 1
@@ -34,7 +37,7 @@ export default function Register() {
 
   const strengthText = ["", "Weak", "Good", "Strong"];
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
 
     if (!form.name || !form.email || !form.password) {
@@ -43,26 +46,33 @@ export default function Register() {
     }
 
     if (!form.email.includes("@")) {
-      setError("Enter a valid college email.");
+      setError("Enter a valid email address.");
       return;
     }
 
-    if (form.password.length < 6) {
-      setError("Password must contain at least 6 characters.");
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters.");
       return;
     }
 
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      setLoading(true);
+      setError("");
+      await register({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      });
       navigate("/dashboard");
-    }, 900);
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <AuthLayout type="register">
-
       <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
         Create your account
       </h1>
@@ -77,18 +87,13 @@ export default function Register() {
         </div>
       )}
 
-      <form
-        onSubmit={submit}
-        className="mt-8 space-y-5"
-      >
-
+      <form onSubmit={submit} className="mt-8 space-y-5">
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-700">
             Full Name
           </label>
 
           <div className="relative">
-
             <User
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -97,15 +102,15 @@ export default function Register() {
             <input
               value={form.name}
               placeholder="Enter your full name"
-              onChange={(e) =>
+              onChange={(e) => {
                 setForm({
                   ...form,
                   name: e.target.value,
-                })
-              }
+                });
+                setError("");
+              }}
               className="w-full rounded-xl border border-slate-200 py-3.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
             />
-
           </div>
         </div>
 
@@ -115,7 +120,6 @@ export default function Register() {
           </label>
 
           <div className="relative">
-
             <Mail
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -125,26 +129,24 @@ export default function Register() {
               type="email"
               value={form.email}
               placeholder="you@college.edu"
-              onChange={(e) =>
+              onChange={(e) => {
                 setForm({
                   ...form,
                   email: e.target.value,
-                })
-              }
+                });
+                setError("");
+              }}
               className="w-full rounded-xl border border-slate-200 py-3.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
             />
-
           </div>
         </div>
 
         <div>
-
           <label className="mb-2 block text-sm font-semibold text-slate-700">
             Password
           </label>
 
           <div className="relative">
-
             <LockKeyhole
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -153,37 +155,29 @@ export default function Register() {
             <input
               type={showPassword ? "text" : "password"}
               value={form.password}
-              placeholder="Create a password"
-              onChange={(e) =>
+              placeholder="Create a password (min 8 chars)"
+              onChange={(e) => {
                 setForm({
                   ...form,
                   password: e.target.value,
-                })
-              }
+                });
+                setError("");
+              }}
               className="w-full rounded-xl border border-slate-200 py-3.5 pl-11 pr-12 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
             />
 
             <button
               type="button"
-              onClick={() =>
-                setShowPassword(!showPassword)
-              }
+              onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
             >
-              {showPassword ? (
-                <EyeOff size={18} />
-              ) : (
-                <Eye size={18} />
-              )}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
-
           </div>
 
           {form.password && (
             <div className="mt-3">
-
               <div className="flex gap-1">
-
                 {[1, 2, 3].map((level) => (
                   <div
                     key={level}
@@ -194,7 +188,6 @@ export default function Register() {
                     }`}
                   />
                 ))}
-
               </div>
 
               <p className="mt-2 text-xs text-slate-400">
@@ -203,26 +196,29 @@ export default function Register() {
                   {strengthText[passwordScore]}
                 </span>
               </p>
-
             </div>
           )}
-
         </div>
 
         <button
           disabled={loading}
           className="group flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-700 disabled:opacity-60"
         >
-          {loading ? "Creating account..." : "Create Account"}
-
-          {!loading && (
-            <ArrowRight
-              size={17}
-              className="transition-transform group-hover:translate-x-1"
-            />
+          {loading ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              Creating account...
+            </>
+          ) : (
+            <>
+              Create Account
+              <ArrowRight
+                size={17}
+                className="transition-transform group-hover:translate-x-1"
+              />
+            </>
           )}
         </button>
-
       </form>
 
       <div className="my-7 flex items-center gap-4">
@@ -238,14 +234,10 @@ export default function Register() {
 
       <p className="mt-8 text-center text-sm text-slate-500">
         Already have an account?{" "}
-        <Link
-          to="/login"
-          className="font-semibold text-indigo-600"
-        >
+        <Link to="/login" className="font-semibold text-indigo-600">
           Sign in
         </Link>
       </p>
-
     </AuthLayout>
   );
 }
