@@ -410,7 +410,7 @@ function SessionCard({
                 className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-sm font-semibold text-amber-700 hover:bg-amber-100 transition"
               >
                 <Star size={16} className="fill-amber-500 text-amber-500" />
-                {session.status === "completed" ? "Edit Review" : "End & Review"}
+                {session.status === "completed" ? "Edit Feedback" : "Feedback"}
               </button>
             </>
           )}
