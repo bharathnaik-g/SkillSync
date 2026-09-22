@@ -12,9 +12,11 @@ import {
   Send,
   AlertCircle,
   CheckCircle2,
+  User,
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import AppShell from "../components/AppShell";
+import UserProfileModal from "../components/UserProfileModal";
 import { matchAPI, sessionAPI } from "../services/api";
 
 export default function Discover() {
@@ -31,6 +33,7 @@ export default function Discover() {
   const [sort, setSort] = useState("Recommended");
   const [favorites, setFavorites] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [viewingProfileUserId, setViewingProfileUserId] = useState(null);
 
   // Request session modal state
   const [selectedMentor, setSelectedMentor] = useState(null);
@@ -358,12 +361,22 @@ export default function Discover() {
                 student={student}
                 favorite={favorites.includes(student._id)}
                 onFavorite={() => toggleFavorite(student._id)}
+                onViewProfile={() => setViewingProfileUserId(student._id)}
                 onRequest={() => openRequestModal(student)}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Student Profile & Reviews Modal */}
+      {viewingProfileUserId && (
+        <UserProfileModal
+          userId={viewingProfileUserId}
+          onClose={() => setViewingProfileUserId(null)}
+          onRequestSession={(student) => openRequestModal(student)}
+        />
+      )}
 
       {/* Request Session Modal */}
       {selectedMentor && (
@@ -488,7 +501,7 @@ export default function Discover() {
   );
 }
 
-function StudentCard({ student, favorite, onFavorite, onRequest }) {
+function StudentCard({ student, favorite, onFavorite, onViewProfile, onRequest }) {
   const initial = student.name ? student.name.charAt(0).toUpperCase() : "S";
   const teaches = student.skillsToTeach || [];
 
@@ -498,9 +511,17 @@ function StudentCard({ student, favorite, onFavorite, onRequest }) {
         <div className="flex items-start justify-between">
           <div className="flex gap-4">
             <div className="relative">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600">
-                {initial}
-              </div>
+              {student.profileImage ? (
+                <img
+                  src={student.profileImage}
+                  alt={student.name}
+                  className="h-14 w-14 rounded-full object-cover border-2 border-indigo-50"
+                />
+              ) : (
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600">
+                  {initial}
+                </div>
+              )}
               <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
             </div>
 
@@ -508,7 +529,7 @@ function StudentCard({ student, favorite, onFavorite, onRequest }) {
               <h2 className="font-bold text-slate-900">{student.name}</h2>
 
               <p className="mt-1 text-xs text-slate-500">
-                {student.department || "Computer Science"} · {student.year || 5}th semester
+                {student.department || "Computer Science"} · {student.year ? `Year ${student.year}` : "Student"}
               </p>
 
               <div className="mt-2 flex items-center gap-1 text-sm">
@@ -563,13 +584,25 @@ function StudentCard({ student, favorite, onFavorite, onRequest }) {
         </div>
       </div>
 
-      <button
-        onClick={onRequest}
-        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
-      >
-        Request Session
-        <ArrowRight size={16} />
-      </button>
+      <div className="mt-6 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onViewProfile}
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition"
+        >
+          <User size={15} className="text-slate-500" />
+          View Profile
+        </button>
+
+        <button
+          type="button"
+          onClick={onRequest}
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 py-2.5 text-xs font-semibold text-white shadow-md shadow-indigo-100 hover:bg-indigo-700 transition"
+        >
+          Request
+          <ArrowRight size={15} />
+        </button>
+      </div>
     </article>
   );
 }

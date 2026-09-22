@@ -11,9 +11,11 @@ import {
   Zap,
   Loader2,
   Map,
+  User,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AppShell from "../components/AppShell";
+import UserProfileModal from "../components/UserProfileModal";
 import { useAuth } from "../context/AuthContext";
 import { matchAPI, sessionAPI } from "../services/api";
 
@@ -28,6 +30,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [ratingData, setRatingData] = useState({ averageRating: null, totalReviews: 0 });
   const [streakDays, setStreakDays] = useState(0);
+  const [viewingProfileUserId, setViewingProfileUserId] = useState(null);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -417,15 +420,16 @@ export default function Dashboard() {
                   <div className="mt-5 flex items-center justify-between pt-2 border-t border-slate-100">
                     <span className="flex items-center gap-1 text-sm text-slate-500">
                       <Star size={15} className="fill-yellow-400 text-yellow-400" />
-                      4.9
+                      {student.rating ? `${student.rating} ★` : "New"}
                     </span>
 
-                    <Link
-                      to="/discover"
-                      className="text-sm font-semibold text-indigo-600"
+                    <button
+                      type="button"
+                      onClick={() => setViewingProfileUserId(student._id)}
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
                     >
-                      Request →
-                    </Link>
+                      View Profile →
+                    </button>
                   </div>
                 </div>
               ))}
@@ -433,6 +437,18 @@ export default function Dashboard() {
           )}
         </section>
       </div>
+
+      {/* Student Profile & Reviews Modal */}
+      {viewingProfileUserId && (
+        <UserProfileModal
+          userId={viewingProfileUserId}
+          onClose={() => setViewingProfileUserId(null)}
+          onRequestSession={() => {
+            setViewingProfileUserId(null);
+            navigate("/discover");
+          }}
+        />
+      )}
     </AppShell>
   );
 }

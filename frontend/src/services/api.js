@@ -56,6 +56,7 @@ export const authAPI = {
 
 export const profileAPI = {
   getProfile: () => request("/api/profile"),
+  getUserProfile: (userId) => request(`/api/profile/${userId}`),
   updateProfile: (profileData) => request("/api/profile", { method: "PUT", body: JSON.stringify(profileData) }),
 };
 
