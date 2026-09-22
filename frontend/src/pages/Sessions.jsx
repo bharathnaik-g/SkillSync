@@ -284,8 +284,8 @@ function SessionCard({
               )}
             </div>
 
-            {/* Google Meet Link Section for Accepted Sessions */}
-            {isAccepted && (
+            {/* Google Meet Link Section for Active Accepted Sessions Only */}
+            {session.status === "accepted" && (
               <div className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-xs font-semibold text-indigo-900">
