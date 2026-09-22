@@ -353,15 +353,17 @@ export default function Dashboard() {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Students whose teaching skills match your learning interests.
+                {user?.skillsToLearn?.length > 0
+                  ? `Peer mentors matched with your target skills (${user.skillsToLearn.join(", ")})`
+                  : "Discover active campus mentors ready for peer skill exchange."}
               </p>
             </div>
 
             <Link
               to="/discover"
-              className="hidden text-sm font-semibold text-indigo-600 sm:block hover:text-indigo-700"
+              className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
             >
-              Explore all matches
+              Explore all mentors →
             </Link>
           </div>
 
@@ -372,67 +374,109 @@ export default function Dashboard() {
           ) : matches.length === 0 ? (
             <div className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center">
               <p className="text-sm text-slate-500">
-                No recommended matches found yet. Add skills you want to learn in your Profile!
+                No recommended mentors found right now.
               </p>
               <Link
                 to="/profile"
                 className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600"
               >
-                Update Profile →
+                Update Your Profile Skills →
               </Link>
             </div>
           ) : (
-            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {matches.slice(0, 3).map((student) => (
-                <div
-                  key={student._id}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-600">
-                        {student.name ? student.name.charAt(0).toUpperCase() : "S"}
+            <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {matches.slice(0, 6).map((student) => {
+                const initial = student.name ? student.name.charAt(0).toUpperCase() : "S";
+                const teaches = student.skillsToTeach || [];
+                return (
+                  <div
+                    key={student._id}
+                    className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          {student.profileImage ? (
+                            <img
+                              src={student.profileImage}
+                              alt={student.name}
+                              className="h-12 w-12 rounded-full object-cover border-2 border-indigo-50"
+                            />
+                          ) : (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-600">
+                              {initial}
+                            </div>
+                          )}
+
+                          <div>
+                            <h3 className="font-bold text-slate-900">{student.name}</h3>
+
+                            <p className="text-xs text-slate-500">
+                              {student.department || "Computer Science"}
+                              {student.year ? ` · Year ${student.year}` : ""}
+                            </p>
+
+                            <div className="mt-1 flex items-center gap-1 text-xs">
+                              <Star size={13} className="fill-yellow-400 text-yellow-400" />
+                              <span className="font-semibold text-slate-700">
+                                {student.rating ? `${student.rating} ★` : "New Mentor"}
+                              </span>
+                              {student.totalReviews > 0 && (
+                                <span className="text-slate-400">({student.totalReviews})</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
-                      <div>
-                        <h3 className="font-semibold text-slate-900">
-                          {student.name}
-                        </h3>
-
-                        <p className="text-xs text-slate-500">
-                          {student.department || "Computer Science"}
+                      {student.bio && (
+                        <p className="mt-3 line-clamp-2 text-xs text-slate-500 leading-relaxed">
+                          {student.bio}
                         </p>
+                      )}
+
+                      <div className="mt-3.5">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                          Can teach
+                        </p>
+                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                          {teaches.length > 0 ? (
+                            teaches.slice(0, 4).map((skill) => (
+                              <span
+                                key={skill}
+                                className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-600"
+                              >
+                                {skill}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">No skills listed</span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-1.5">
-                      {(student.skillsToTeach || []).slice(0, 3).map((skill) => (
-                        <span
-                          key={skill}
-                          className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-600"
-                        >
-                          {skill}
-                        </span>
-                      ))}
+                    <div className="mt-5 flex items-center gap-2 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setViewingProfileUserId(student._id)}
+                        className="flex-1 flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                      >
+                        <User size={14} className="text-slate-400" />
+                        View Profile
+                      </button>
+
+                      <Link
+                        to={`/discover?q=${encodeURIComponent(teaches[0] || student.name)}`}
+                        className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-indigo-600 py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 transition"
+                      >
+                        Request
+                        <ArrowRight size={14} />
+                      </Link>
                     </div>
                   </div>
-
-                  <div className="mt-5 flex items-center justify-between pt-2 border-t border-slate-100">
-                    <span className="flex items-center gap-1 text-sm text-slate-500">
-                      <Star size={15} className="fill-yellow-400 text-yellow-400" />
-                      {student.rating ? `${student.rating} ★` : "New"}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => setViewingProfileUserId(student._id)}
-                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
-                    >
-                      View Profile →
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
