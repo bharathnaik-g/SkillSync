@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
     year: Number,
     bio: String,
     profileImage: String,
+    availability: String,
 
     skillsToTeach: [String],
     skillsToLearn: [String]

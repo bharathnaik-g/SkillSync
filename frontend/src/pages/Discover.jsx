@@ -89,18 +89,26 @@ export default function Discover() {
     setSearchParams({}, { replace: true });
   };
 
+  const matchesSkill = (skill, searchStr) => {
+    if (!skill || !searchStr) return false;
+    const s = skill.toLowerCase().trim();
+    const q = searchStr.toLowerCase().trim();
+    if (s === q) return true;
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`(?:^|\\b|\\s)${escaped}(?:$|\\b|\\s)`, "i");
+    return regex.test(s);
+  };
+
   const filteredStudents = useMemo(() => {
     let result = matches.filter((student) => {
       const search = query.toLowerCase().trim();
       const teaches = student.skillsToTeach || [];
-      const learns = student.skillsToLearn || [];
 
       const matchesSearch =
         !search ||
         (student.name && student.name.toLowerCase().includes(search)) ||
         (student.department && student.department.toLowerCase().includes(search)) ||
-        teaches.some((skill) => skill.toLowerCase().includes(search)) ||
-        learns.some((skill) => skill.toLowerCase().includes(search));
+        teaches.some((skill) => matchesSkill(skill, search));
 
       const matchesDepartment =
         department === "All" ||

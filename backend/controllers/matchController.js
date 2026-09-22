@@ -1,6 +1,15 @@
 const User = require("../models/User");
 const Review = require("../models/Review");
 
+// Helper function to escape regex special characters
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Helper function to build a skill matching regex with word boundaries
+const createSkillRegex = (queryStr) => {
+  const escaped = escapeRegex(queryStr);
+  return new RegExp(`(?:^|\\b|\\s)${escaped}(?:$|\\b|\\s)`, "i");
+};
+
 // FIND STUDENTS WHO CAN TEACH SKILLS
 // OR SEARCH STUDENTS BY QUERY
 exports.findMatches = async (req, res) => {
@@ -18,19 +27,17 @@ exports.findMatches = async (req, res) => {
     let filter = { _id: { $ne: currentUser._id } };
 
     if (queryStr) {
-      const regex = new RegExp(queryStr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+      const nameOrDeptRegex = new RegExp(escapeRegex(queryStr), "i");
+      const skillRegex = createSkillRegex(queryStr);
+
       filter.$or = [
-        { name: regex },
-        { skillsToTeach: regex },
-        { skillsToLearn: regex },
-        { department: regex }
+        { name: nameOrDeptRegex },
+        { department: nameOrDeptRegex },
+        { skillsToTeach: skillRegex }
       ];
     } else if (currentUser.skillsToLearn && currentUser.skillsToLearn.length > 0) {
       filter.skillsToTeach = {
-        $in: currentUser.skillsToLearn.map(skill => new RegExp(
-          `^${skill.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
-          "i"
-        ))
+        $in: currentUser.skillsToLearn.map(skill => createSkillRegex(skill))
       };
     }
 

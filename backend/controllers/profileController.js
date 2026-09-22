@@ -51,6 +51,7 @@ exports.updateProfile = async (req, res) => {
       "year",
       "bio",
       "profileImage",
+      "availability",
       "skillsToTeach",
       "skillsToLearn"
     ];

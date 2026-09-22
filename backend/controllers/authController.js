@@ -15,7 +15,19 @@ const generateToken = (userId) => {
 // REGISTER
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const {
+      name,
+      email,
+      password,
+      college,
+      department,
+      year,
+      bio,
+      profileImage,
+      availability,
+      skillsToTeach,
+      skillsToLearn
+    } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -44,9 +56,17 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await User.create({
-      name,
+      name: name.trim(),
       email: normalizedEmail,
-      password: hashedPassword
+      password: hashedPassword,
+      college: college || "",
+      department: department || "Computer Science",
+      year: year ? Number(year) : 1,
+      bio: bio || "",
+      profileImage: profileImage || "",
+      availability: availability || "Online",
+      skillsToTeach: Array.isArray(skillsToTeach) ? skillsToTeach : [],
+      skillsToLearn: Array.isArray(skillsToLearn) ? skillsToLearn : []
     });
 
     res.status(201).json({
@@ -54,9 +74,16 @@ exports.register = async (req, res) => {
       token: generateToken(user._id),
       user: {
         id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
-        isEmailVerified: user.isEmailVerified
+        college: user.college,
+        department: user.department,
+        year: user.year,
+        profileImage: user.profileImage,
+        availability: user.availability,
+        skillsToTeach: user.skillsToTeach,
+        skillsToLearn: user.skillsToLearn,
       }
     });
   } catch (error) {

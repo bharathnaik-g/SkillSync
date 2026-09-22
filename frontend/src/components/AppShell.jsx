@@ -6,7 +6,6 @@ import {
   CalendarDays,
   Compass,
   Menu,
-  Search,
   UserRound,
   X,
   LogOut,
@@ -30,7 +29,6 @@ export default function AppShell({ children }) {
   } = useNotifications();
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [topSearch, setTopSearch] = useState("");
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
 
   const initial = user?.name ? user.name.charAt(0).toUpperCase() : "U";
@@ -38,15 +36,6 @@ export default function AppShell({ children }) {
   const handleLogout = () => {
     logout();
     navigate("/login");
-  };
-
-  const handleTopSearchSubmit = (e) => {
-    e.preventDefault();
-    if (topSearch.trim()) {
-      navigate(`/discover?q=${encodeURIComponent(topSearch.trim())}`);
-    } else {
-      navigate("/discover");
-    }
   };
 
   const navItems = [
@@ -296,21 +285,7 @@ export default function AppShell({ children }) {
       {/* Main */}
       <div className="lg:pl-64">
         {/* Desktop topbar */}
-        <div className="hidden h-20 items-center justify-between border-b border-slate-200 bg-white px-8 lg:flex">
-          <form onSubmit={handleTopSearchSubmit} className="relative w-80">
-            <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-
-            <input
-              value={topSearch}
-              onChange={(e) => setTopSearch(e.target.value)}
-              placeholder="Search skills (e.g. React, Java)..."
-              className="w-full rounded-xl bg-slate-50 py-2.5 pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100"
-            />
-          </form>
-
+        <div className="hidden h-20 items-center justify-end border-b border-slate-200 bg-white px-8 lg:flex">
           <div className="flex items-center gap-5 relative">
             {/* Bell Dropdown Trigger */}
             <div className="relative">
